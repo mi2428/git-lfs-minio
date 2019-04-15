@@ -35,7 +35,7 @@ func NewMinioLFS(p MinioLFSInitParams) *MinioLFS {
 	return m
 }
 
-func (m *MinioLFS) is_exist(oid string) bool {
+func (m *MinioLFS) IsExist(oid string) bool {
 	if _, err := m.api.StatObject(m.bucket, oid, minio.StatObjectOptions{}); err != nil {
 		res := minio.ToErrorResponse(err)
 		switch res.Code {
@@ -49,7 +49,7 @@ func (m *MinioLFS) is_exist(oid string) bool {
 	return true
 }
 
-func (m *MinioLFS) downloadurl(oid string) *url.URL {
+func (m *MinioLFS) Downloadurl(oid string) *url.URL {
 	reqParams := make(url.Values)
 	presignedURL, err := m.api.PresignedGetObject(m.bucket, oid, m.urlExpires*time.Second, reqParams)
 	if err != nil {
@@ -58,7 +58,7 @@ func (m *MinioLFS) downloadurl(oid string) *url.URL {
 	return presignedURL
 }
 
-func (m *MinioLFS) uploadurl(oid string) *url.URL {
+func (m *MinioLFS) UploadURL(oid string) *url.URL {
 	presignedURL, err := m.api.PresignedPutObject(m.bucket, oid, m.urlExpires*time.Second)
 	if err != nil {
 		log.Fatal(err)
