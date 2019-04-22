@@ -30,10 +30,14 @@ func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 	var response apiResponse
 	for _, object := range r.Objects {
 		oid := object.Oid
+		size := object.Size
 		if !m.IsExist(oid) {
+			// insert 404 'error' object, instead of 'action' object
 			object_not_found()
 		}
+		// create normal response object
 		url := m.DownloadURL(oid)
+		expires_at := 
 	}
 	json.NewEncoder(w).Encode(response)
 }

@@ -19,7 +19,7 @@ type MinioLFSInitParams struct {
 type MinioLFS struct {
 	api        *minio.Client
 	bucket     string
-	urlExpires time.Duration
+	urlExpires time.time
 }
 
 func NewMinioLFS(p MinioLFSInitParams) *MinioLFS {
@@ -49,7 +49,7 @@ func (m *MinioLFS) IsExist(oid string) bool {
 	return true
 }
 
-func (m *MinioLFS) Downloadurl(oid string) *url.URL {
+func (m *MinioLFS) DownloadURL(oid string) *url.URL {
 	reqParams := make(url.Values)
 	presignedURL, err := m.api.PresignedGetObject(m.bucket, oid, m.urlExpires*time.Second, reqParams)
 	if err != nil {
