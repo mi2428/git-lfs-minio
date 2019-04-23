@@ -65,9 +65,40 @@ func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 }
 
 func upload(r apiRequest) {
-	// 1. check if the requested file is exist (accept non-exist case)
-	// 2. generate pre-signed url
-	// 3. return response structure
+	var response apiResponse
+
+	for _, object := range r.Objects {
+		var resobj apiResObject
+		oid := object.Oid
+		size := object.Size
+
+		resobj.Oid = oid
+		resobj.Size = size
+
+		if !m.IsExist(oid) {
+			resobj.Error = &apiResObjError{
+				Code:    "400",
+				Message: "something wrong",
+			}
+			response.Objects = append(response.Objects, resobj)
+			continue
+		}
+		resobj.Error = nil
+
+		url := m.DownloadURL(oid)
+		expires_at := time.Now().Add(m.URLExpires)
+
+		resobj.Actions.Download = nil
+		resobj.Actions.Verify = nil
+		resobj.Actions.Upload = &apiResObjActUpload{
+			ExpiresAt: expires_at.Format(time.RFC3339),
+			Header:    nil,
+			Href:      url.String(),
+		}
+		response.Objects = append(response.Objects, resobj)
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
 
 func verify(r apiRequest) {
