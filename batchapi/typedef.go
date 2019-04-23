@@ -29,19 +29,19 @@ type apiResObjActions struct {
 type apiResObjActUpload struct {
 	Href      string              `json:"href"`
 	Header    *apiResObjActHeader `json:"header"`
-	ExpiresAt string              `json:"expires_at"`
+	ExpiresAt string              `json:"expires_at,omitempty"`
 }
 
 type apiResObjActDownload struct {
 	Href      string              `json:"href"`
 	Header    *apiResObjActHeader `json:"header"`
-	ExpiresAt string              `json:"expires_at"`
+	ExpiresAt string              `json:"expires_at,omitempty"`
 }
 
 type apiResObjActVerify struct {
 	Href      string              `json:"href"`
 	Header    *apiResObjActHeader `json:"header"`
-	ExpiresAt string              `json:"expires_at"`
+	ExpiresAt string              `json:"expires_at,omitempty"`
 }
 
 type apiResObjActHeader struct {
