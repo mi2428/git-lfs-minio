@@ -19,10 +19,10 @@ func RequestHandler(w http.ResponseWriter, r *http.Request, m *miniolfs.MinioLFS
 		download(w, reqbody, m)
 		break
 	case "upload":
-		upload(reqbody)
+		upload(w, reqbody, m)
 		break
 	case "verify":
-		verify(reqbody)
+		verify(w, reqbody, m)
 		break
 	}
 }
@@ -40,8 +40,8 @@ func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 
 		if !m.IsExist(oid) {
 			resobj.Error = &apiResObjError{
-				Code:    "400",
-				Message: "something wrong",
+				Code:    "404",
+				Message: "Object not found",
 			}
 			response.Objects = append(response.Objects, resobj)
 			continue
@@ -51,9 +51,9 @@ func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 		url := m.DownloadURL(oid)
 		expires_at := time.Now().Add(m.URLExpires)
 
-		resobj.Actions.Download = nil
+		resobj.Actions.Upload = nil
 		resobj.Actions.Verify = nil
-		resobj.Actions.Upload = &apiResObjActUpload{
+		resobj.Actions.Download = &apiResObjActDownload{
 			ExpiresAt: expires_at.Format(time.RFC3339),
 			Header:    nil,
 			Href:      url.String(),
@@ -64,7 +64,7 @@ func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func upload(r apiRequest) {
+func upload(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 	var response apiResponse
 
 	for _, object := range r.Objects {
@@ -75,17 +75,17 @@ func upload(r apiRequest) {
 		resobj.Oid = oid
 		resobj.Size = size
 
-		if !m.IsExist(oid) {
+		if m.IsExist(oid) {
 			resobj.Error = &apiResObjError{
-				Code:    "400",
-				Message: "something wrong",
+				Code:    "422",
+				Message: "Object already exist",
 			}
 			response.Objects = append(response.Objects, resobj)
 			continue
 		}
 		resobj.Error = nil
 
-		url := m.DownloadURL(oid)
+		url := m.UploadURL(oid)
 		expires_at := time.Now().Add(m.URLExpires)
 
 		resobj.Actions.Download = nil
@@ -101,6 +101,6 @@ func upload(r apiRequest) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func verify(r apiRequest) {
-	// 1. check if the requested file is exist
+func verify(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
+	// TBD
 }

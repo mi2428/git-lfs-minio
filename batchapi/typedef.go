@@ -16,8 +16,8 @@ type apiResponse struct {
 
 type apiResObject struct {
 	apiReqObject
-	Actions apiResObjActions `json:"actions"`
-	Error   *apiResObjError  `json:"error"`
+	Actions *apiResObjActions `json:"actions"`
+	Error   *apiResObjError   `json:"error"`
 }
 
 type apiResObjActions struct {
