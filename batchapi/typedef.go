@@ -1,7 +1,5 @@
 package batchapi
 
-import "time"
-
 type apiRequest struct {
 	Operation string         `json:"operation"`
 	Objects   []apiReqObject `json:"objects"`
@@ -13,8 +11,7 @@ type apiReqObject struct {
 }
 
 type apiResponse struct {
-	Operation string         `json:"operation"`
-	Objects   []apiResObject `json:"objects"`
+	Objects []apiResObject `json:"objects"`
 }
 
 type apiResObject struct {
@@ -31,19 +28,19 @@ type apiResObjActions struct {
 type apiResObjActUpload struct {
 	Href      string             `json:"href"`
 	Header    apiResObjActHeader `json:"header"`
-	ExpiresAt time.Time          `json:"expires_at"`
+	ExpiresAt string             `json:"expires_at"`
 }
 
 type apiResObjActDownload struct {
 	Href      string             `json:"href"`
 	Header    apiResObjActHeader `json:"header"`
-	ExpiresAt time.Time          `json:"expires_at"`
+	ExpiresAt string             `json:"expires_at"`
 }
 
 type apiResObjActVerify struct {
 	Href      string             `json:"href"`
 	Header    apiResObjActHeader `json:"header"`
-	ExpiresAt time.Time          `json:"expires_at"`
+	ExpiresAt string             `json:"expires_at"`
 }
 
 type apiResObjActHeader struct {

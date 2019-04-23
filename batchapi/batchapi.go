@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"../miniolfs"
 )
@@ -29,15 +30,26 @@ func RequestHandler(w http.ResponseWriter, r *http.Request, m *miniolfs.MinioLFS
 func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 	var response apiResponse
 	for _, object := range r.Objects {
+		var resobj apiResObject
 		oid := object.Oid
 		size := object.Size
+
+		resobj.Oid = oid
+		resobj.Size = size
+
 		if !m.IsExist(oid) {
 			// insert 404 'error' object, instead of 'action' object
-			object_not_found()
+			continue
 		}
-		// create normal response object
+
 		url := m.DownloadURL(oid)
-		expires_at := 
+		expires_at := time.Now().Add(m.URLExpires)
+
+		resobj.Actions.Upload = apiResObjActUpload{
+			ExpiresAt: expires_at.Format(time.RFC3339),
+			Href:      url.String(),
+		}
+
 	}
 	json.NewEncoder(w).Encode(response)
 }

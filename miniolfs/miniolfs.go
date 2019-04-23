@@ -13,13 +13,13 @@ type MinioLFSInitParams struct {
 	AccessKey  string
 	SecretKey  string
 	Bucket     string
-	URLExpires time.Duration
+	URLExpires uint64
 }
 
 type MinioLFS struct {
 	api        *minio.Client
-	bucket     string
-	urlExpires time.time
+	Bucket     string
+	URLExpires time.Duration
 }
 
 func NewMinioLFS(p MinioLFSInitParams) *MinioLFS {
@@ -30,13 +30,13 @@ func NewMinioLFS(p MinioLFSInitParams) *MinioLFS {
 	} else {
 		m.api = api
 	}
-	m.bucket = p.Bucket
-	m.urlExpires = p.URLExpires
+	m.Bucket = p.Bucket
+	m.URLExpires = time.Duration(p.URLExpires) * time.Second
 	return m
 }
 
 func (m *MinioLFS) IsExist(oid string) bool {
-	if _, err := m.api.StatObject(m.bucket, oid, minio.StatObjectOptions{}); err != nil {
+	if _, err := m.api.StatObject(m.Bucket, oid, minio.StatObjectOptions{}); err != nil {
 		res := minio.ToErrorResponse(err)
 		switch res.Code {
 		case "NoSuchBucket":
@@ -51,7 +51,7 @@ func (m *MinioLFS) IsExist(oid string) bool {
 
 func (m *MinioLFS) DownloadURL(oid string) *url.URL {
 	reqParams := make(url.Values)
-	presignedURL, err := m.api.PresignedGetObject(m.bucket, oid, m.urlExpires*time.Second, reqParams)
+	presignedURL, err := m.api.PresignedGetObject(m.Bucket, oid, m.URLExpires, reqParams)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func (m *MinioLFS) DownloadURL(oid string) *url.URL {
 }
 
 func (m *MinioLFS) UploadURL(oid string) *url.URL {
-	presignedURL, err := m.api.PresignedPutObject(m.bucket, oid, m.urlExpires*time.Second)
+	presignedURL, err := m.api.PresignedPutObject(m.Bucket, oid, m.URLExpires)
 	if err != nil {
 		log.Fatal(err)
 	}

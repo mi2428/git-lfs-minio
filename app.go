@@ -28,7 +28,7 @@ func main() {
 		AccessKey:  minioAccessKey,
 		SecretKey:  minioSecretKey,
 		Bucket:     minioBucket,
-		URLExpires: minioURLExpires,
+		URLExpires: minioURLExpires
 	})
 
 	router := mux.NewRouter().StrictSlash(true)
