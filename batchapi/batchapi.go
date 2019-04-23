@@ -29,6 +29,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request, m *miniolfs.MinioLFS
 
 func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 	var response apiResponse
+
 	for _, object := range r.Objects {
 		var resobj apiResObject
 		oid := object.Oid
@@ -38,19 +39,28 @@ func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 		resobj.Size = size
 
 		if !m.IsExist(oid) {
-			// insert 404 'error' object, instead of 'action' object
+			resobj.Error = &apiResObjError{
+				Code:    "400",
+				Message: "something wrong",
+			}
+			response.Objects = append(response.Objects, resobj)
 			continue
 		}
+		resobj.Error = nil
 
 		url := m.DownloadURL(oid)
 		expires_at := time.Now().Add(m.URLExpires)
 
-		resobj.Actions.Upload = apiResObjActUpload{
+		resobj.Actions.Download = nil
+		resobj.Actions.Verify = nil
+		resobj.Actions.Upload = &apiResObjActUpload{
 			ExpiresAt: expires_at.Format(time.RFC3339),
+			Header:    nil,
 			Href:      url.String(),
 		}
-
+		response.Objects = append(response.Objects, resobj)
 	}
+
 	json.NewEncoder(w).Encode(response)
 }
 
@@ -62,12 +72,4 @@ func upload(r apiRequest) {
 
 func verify(r apiRequest) {
 	// 1. check if the requested file is exist
-}
-
-func object_not_found() {
-	// return 404
-}
-
-func object_already_exist() {
-	// return 400?
 }
