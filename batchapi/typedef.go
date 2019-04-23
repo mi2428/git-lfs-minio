@@ -16,31 +16,31 @@ type apiResponse struct {
 
 type apiResObject struct {
 	apiReqObject
-	Actions *apiResObjActions `json:"actions"`
-	Error   *apiResObjError   `json:"error"`
+	Actions *apiResObjActions `json:"actions,omitempty"`
+	Error   *apiResObjError   `json:"error,omitempty"`
 }
 
 type apiResObjActions struct {
-	Upload   *apiResObjActUpload   `json:"upload"`
-	Download *apiResObjActDownload `json:"download"`
-	Verify   *apiResObjActVerify   `json:"verify"`
+	Upload   *apiResObjActUpload   `json:"upload,omitempty"`
+	Download *apiResObjActDownload `json:"download,omitempty"`
+	Verify   *apiResObjActVerify   `json:"verify,omitempty"`
 }
 
 type apiResObjActUpload struct {
 	Href      string              `json:"href"`
-	Header    *apiResObjActHeader `json:"header"`
+	Header    *apiResObjActHeader `json:"header,omitempty"`
 	ExpiresAt string              `json:"expires_at,omitempty"`
 }
 
 type apiResObjActDownload struct {
 	Href      string              `json:"href"`
-	Header    *apiResObjActHeader `json:"header"`
+	Header    *apiResObjActHeader `json:"header,omitempty"`
 	ExpiresAt string              `json:"expires_at,omitempty"`
 }
 
 type apiResObjActVerify struct {
 	Href      string              `json:"href"`
-	Header    *apiResObjActHeader `json:"header"`
+	Header    *apiResObjActHeader `json:"header,omitempty"`
 	ExpiresAt string              `json:"expires_at,omitempty"`
 }
 
