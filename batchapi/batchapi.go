@@ -10,7 +10,6 @@ import (
 )
 
 func RequestHandler(w http.ResponseWriter, r *http.Request, m *miniolfs.MinioLFS) {
-	log.Print("called BatchAPI Request Handler")
 	var reqbody apiRequest
 	if err := json.NewDecoder(r.Body).Decode(&reqbody); err != nil {
 		log.Fatal(err)
