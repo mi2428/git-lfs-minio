@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"./batchapi"
@@ -12,24 +15,36 @@ import (
 )
 
 const (
-	serverListenAddr    = ":8080"
 	serverVersionString = "version: 0.1.0"
-	minioHost           = "localhost:9000"
-	minioAccessKey      = "minio-access-key"
-	minioSecretKey      = "minio-secret-key"
-	minioBucket         = "git-lfs"
-	minioURLExpires     = 3600
+	configFile          = "./config.json"
 )
 
+type config struct {
+	ServerListenAddr string `json:"serverListenAddr"`
+	MinioHost        string `json:"minioHost"`
+	MinioAccessKey   string `json:"minioAccessKey"`
+	MinioSecretKey   string `json:"minioSecretKey"`
+	MinioBucket      string `json:"minioBucket"`
+	MinioURLExpires  uint64 `json:"minioURLExpires"`
+}
+
 var m *miniolfs.MinioLFS
+var runningConf config
 
 func main() {
+	raw, err := ioutil.ReadFile(configFile)
+	if err != nil {
+		log.Fatal(err)
+		os.Exit(1)
+	}
+	json.Unmarshal(raw, &runningConf)
+
 	m = miniolfs.NewMinioLFS(miniolfs.MinioLFSInitParams{
-		Host:       minioHost,
-		AccessKey:  minioAccessKey,
-		SecretKey:  minioSecretKey,
-		Bucket:     minioBucket,
-		URLExpires: minioURLExpires,
+		Host:       runningConf.MinioHost,
+		AccessKey:  runningConf.MinioAccessKey,
+		SecretKey:  runningConf.MinioSecretKey,
+		Bucket:     runningConf.MinioBucket,
+		URLExpires: runningConf.MinioURLExpires,
 	})
 
 	router := mux.NewRouter().StrictSlash(true)
@@ -39,7 +54,7 @@ func main() {
 	router.Use(setHTTPHeader)
 
 	server := &http.Server{
-		Addr:           serverListenAddr,
+		Addr:           runningConf.ServerListenAddr,
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
