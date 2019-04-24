@@ -4,40 +4,108 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"time"
 
 	"../miniolfs"
 )
 
 func RequestHandler(w http.ResponseWriter, r *http.Request, m *miniolfs.MinioLFS) {
+	log.Print("called BatchAPI Request Handler")
 	var reqbody apiRequest
 	if err := json.NewDecoder(r.Body).Decode(&reqbody); err != nil {
 		log.Fatal(err)
 	}
 	switch reqbody.Operation {
+	case "upload":
+		upload(w, reqbody, m)
+		break
 	case "download":
 		download(w, reqbody, m)
 		break
-	case "upload":
-		upload(reqbody)
-		break
 	case "verify":
-		verify(reqbody)
+		verify(w, reqbody, m)
 		break
 	}
 }
 
+func upload(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
+	var response apiResponse
+
+	for _, object := range r.Objects {
+		var resobj apiResObject
+		oid := object.Oid
+		size := object.Size
+
+		resobj.Oid = oid
+		resobj.Size = size
+
+		if m.IsExist(oid) {
+			resobj.Error = &apiResObjError{
+				Code:    "422",
+				Message: "Object already exist",
+			}
+			response.Objects = append(response.Objects, resobj)
+			continue
+		}
+		resobj.Error = nil
+
+		url := m.UploadURL(oid)
+		expires_at := time.Now().Add(m.URLExpires)
+
+		resobj.Actions = &apiResObjActions{
+			Upload: &apiResObjActUpload{
+				ExpiresAt: expires_at.Format(time.RFC3339),
+				Header:    nil,
+				Href:      url.String(),
+			},
+			Download: nil,
+			Verify:   nil,
+		}
+		response.Objects = append(response.Objects, resobj)
+	}
+
+	json.NewEncoder(w).Encode(response)
+}
+
 func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
-	// 1. check if the requested file is exist (accept exist case)
-	// 2. generate pre-signed url
-	// 3. return response structure
+	var response apiResponse
+
+	for _, object := range r.Objects {
+		var resobj apiResObject
+		oid := object.Oid
+		size := object.Size
+
+		resobj.Oid = oid
+		resobj.Size = size
+
+		if !m.IsExist(oid) {
+			resobj.Error = &apiResObjError{
+				Code:    "404",
+				Message: "Object not found",
+			}
+			response.Objects = append(response.Objects, resobj)
+			continue
+		}
+		resobj.Error = nil
+
+		url := m.DownloadURL(oid)
+		expires_at := time.Now().Add(m.URLExpires)
+
+		resobj.Actions = &apiResObjActions{
+			Upload: nil,
+			Download: &apiResObjActDownload{
+				ExpiresAt: expires_at.Format(time.RFC3339),
+				Header:    nil,
+				Href:      url.String(),
+			},
+			Verify: nil,
+		}
+		response.Objects = append(response.Objects, resobj)
+	}
+
+	json.NewEncoder(w).Encode(response)
 }
 
-func upload(r apiRequest) {
-	// 1. check if the requested file is exist (accept non-exist case)
-	// 2. generate pre-signed url
-	// 3. return response structure
-}
-
-func verify(r apiRequest) {
-	// 1. check if the requested file is exist
+func verify(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
+	// TBD
 }

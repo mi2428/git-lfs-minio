@@ -35,7 +35,6 @@ func main() {
 	router.HandleFunc("/", indexHandler)
 	router.HandleFunc("/version", versionHandler)
 	router.HandleFunc("/objects/batch", batchHandler)
-	router.HandleFunc("/verify", verifyHandler)
 	router.Use(setHTTPHeader)
 
 	server := &http.Server{
@@ -66,8 +65,4 @@ func versionHandler(w http.ResponseWriter, r *http.Request) {
 
 func batchHandler(w http.ResponseWriter, r *http.Request) {
 	batchapi.RequestHandler(w, r, m)
-}
-
-func verifyHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "It works!")
 }

@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  minio:
+    image: minio/minio:latest
+    ports:
+      - 9000:9000
+    volumes:
+      - minio-data:/export
+      - minio-conf:/root/.minio
+    environment:
+      MINIO_ACCESS_KEY: minio-access-key
+      MINIO_SECRET_KEY: minio-secret-key
+    command: server /export
+
+volumes:
+  minio-data:
+  minio-conf:
