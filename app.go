@@ -12,12 +12,13 @@ import (
 )
 
 const (
+	serverListenAddr    = ":8080"
+	serverVersionString = "version: 0.1.0"
 	minioHost           = "localhost:9000"
 	minioAccessKey      = "minio-access-key"
 	minioSecretKey      = "minio-secret-key"
 	minioBucket         = "git-lfs"
 	minioURLExpires     = 3600
-	serverVersionString = "version: 0.1.0"
 )
 
 var m *miniolfs.MinioLFS
@@ -38,7 +39,7 @@ func main() {
 	router.Use(setHTTPHeader)
 
 	server := &http.Server{
-		Addr:           ":8080",
+		Addr:           serverListenAddr,
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
