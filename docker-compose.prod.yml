@@ -6,7 +6,7 @@ services:
       context: .
     restart: always
     ports:
-      - 10.0.3.201:8080:8080
+      - 8080:8080
     volumes:
       - ./config.json:/opt/config.json:ro
     depends_on:
@@ -18,7 +18,7 @@ services:
     image: minio/minio:latest
     restart: always
     ports:
-      - 10.0.3.201:9000:9000
+      - 9000:9000
     environment:
       MINIO_ACCESS_KEY: minio-access-key
       MINIO_SECRET_KEY: minio-secret-key
