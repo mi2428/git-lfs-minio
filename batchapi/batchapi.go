@@ -14,6 +14,7 @@ func RequestHandler(w http.ResponseWriter, r *http.Request, m *miniolfs.MinioLFS
 	if err := json.NewDecoder(r.Body).Decode(&reqbody); err != nil {
 		log.Fatal(err)
 	}
+	log.Println(reqbody)
 	switch reqbody.Operation {
 	case "upload":
 		upload(w, reqbody, m)
@@ -39,8 +40,9 @@ func upload(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 		resobj.Size = size
 
 		if m.IsExist(oid) {
+			resobj.Actions = nil
 			resobj.Error = &apiResObjError{
-				Code:    "422",
+				Code:    422,
 				Message: "Object already exist",
 			}
 			response.Objects = append(response.Objects, resobj)
@@ -79,7 +81,7 @@ func download(w http.ResponseWriter, r apiRequest, m *miniolfs.MinioLFS) {
 
 		if !m.IsExist(oid) {
 			resobj.Error = &apiResObjError{
-				Code:    "404",
+				Code:    404,
 				Message: "Object not found",
 			}
 			response.Objects = append(response.Objects, resobj)

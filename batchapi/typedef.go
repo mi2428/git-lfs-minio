@@ -50,6 +50,6 @@ type apiResObjActHeader struct {
 }
 
 type apiResObjError struct {
-	Code    string `json:"code"`
+	Code    uint   `json:"code"`
 	Message string `json:"message"`
 }
