@@ -6,33 +6,29 @@ services:
       context: .
     restart: always
     ports:
-      - 8888:8080
+      - 10.0.3.201:8080:8080
     volumes:
       - ./config.json:/opt/config.json:ro
     depends_on:
       - minio
     networks:
       - front
-      - back
 
   minio:
     image: minio/minio:latest
     restart: always
-    #ports:
-    #  - 9000:9000
+    ports:
+      - 10.0.3.201:9000:9000
     environment:
       MINIO_ACCESS_KEY: minio-access-key
       MINIO_SECRET_KEY: minio-secret-key
+    command: server /export
     volumes:
       - ./minio-volumes/data:/export
       - ./minio-volumes/conf:/root/.minio
     networks:
-      - back
-    command: server /export
+      - front
 
 networks:
   front:
-    external:
-      name: lab-production
-  back:
 
