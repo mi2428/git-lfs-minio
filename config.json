@@ -1,6 +1,6 @@
 {
     "serverListenAddr": ":8080",
-    "minioHost": "10.0.3.201:9000",
+    "minioHost": "localhost:9000",
     "minioAccessKey": "minio-access-key",
     "minioSecretKey": "minio-secret-key",
     "minioBucket": "git-lfs",
